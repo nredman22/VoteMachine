@@ -3,72 +3,60 @@ const app = angular.module("Candidate.App", []);
 app.component("itmRoot", {
     controller: class {
         constructor() {
-            this.candidates = [{ name: "Puppies", votes: 10, percentage: 0 }, { name: "Kittens", votes: 12, percentage: 0 }, { name: "Gerbils", votes: 7, percentage: 0  }];
-            this.calculateVotePercentages();
-            this.sortCandidates();
+            this.candidates = [{ name: "Puppies", votes: 10 }, { name: "Kittens", votes: 12 }, { name: "Gerbils", votes: 7 }];
+            this.totalVotes = 29;
         }
 
         onVote(candidate) {
-            console.log(`Vote for ${candidate.name}`);
             candidate.votes += 1;
             this.totalVotes += 1;
-            this.calculateVotePercentages();
-            this.sortCandidates();
         }
 
 
         onAddCandidate(candidate) {
             if(this.candidates.find( candidateA => candidateA.name.toLocaleLowerCase() === candidate.name.toLocaleLowerCase())){
+                alert(`${candidate.name} is already in use!`);
                 return;
             }
-            console.log(`Added candidate ${candidate.name}`);
-            candidate.votes = 0;
-            candidate.percentage = 0;
             this.candidates.push(candidate);
         }
 
         onRemoveCandidate(candidate) {
-            console.log(`Removed candidate ${candidate.name}`);
             let index = this.candidates.indexOf(candidate);
             if (index > -1) {
-                this.candidates.splice(index, 1);
-                this.calculateVotePercentages();
+                this.totalVotes -= candidate.votes;
+                this.candidates.splice(index, 1);  
             }
-        }
-
-        calculateVotePercentages() {
-            let totalVotes = 0;
-            this.candidates.forEach((candidate) => {
-                totalVotes += candidate.votes
-            });
-            this.candidates.forEach((candidate) => {
-                console.log(totalVotes);
-                candidate.percentage = Math.round((candidate.votes / totalVotes) * 100);
-            });
-        }
-
-        sortCandidates() {
-            this.candidates.sort(function(candidateA, candidateB) {
-                return candidateB.votes - candidateA.votes});
         }
     },
     template: `
-        <h1>Which candidate brings the most joy?</h1>
-             
-        <itm-results 
-            candidates="$ctrl.candidates">
-        </itm-results>
+        <div class="container">
+            <div class="row justify-content-center" id="headline">
+                <h1>Which candidate brings the most joy?</h1>
+            </div>
+        </div>
 
-        <itm-vote 
-            candidates="$ctrl.candidates"
-            on-vote="$ctrl.onVote($candidate)">
-        </itm-vote>
+        <div class="container">       
+            <itm-results 
+                candidates="$ctrl.candidates"
+                total-votes="$ctrl.totalVotes">
+            </itm-results>
+        </div>
 
-        <itm-management 
-            candidates="$ctrl.candidates"
-            on-add="$ctrl.onAddCandidate($candidate)"
-            on-remove="$ctrl.onRemoveCandidate($candidate)">
-        </itm-management>
+        <div class="container">
+            <itm-vote 
+                candidates="$ctrl.candidates"
+                on-vote="$ctrl.onVote($candidate)">
+            </itm-vote>
+        </div>
+
+        <div class="container live-results">
+            <itm-management 
+                candidates="$ctrl.candidates"
+                on-add="$ctrl.onAddCandidate($candidate)"
+                on-remove="$ctrl.onRemoveCandidate($candidate)">
+            </itm-management>
+        </div>
     `
 });
 
@@ -82,13 +70,17 @@ app.component("itmManagement", {
         constructor() {
             this.newCandidate = {
                 name: "",
+                votes: 0
             };
         }
 
         submitCandidate(candidate) {
             //if (candidate.name == null || candidate.name.length <= 0) return;
             this.onAdd({ $candidate: candidate });
-            this.newCandidate = {};
+            this.newCandidate = {
+                name: "",
+                votes: 0
+            }
         }
 
         removeCandidate(candidate) {
@@ -100,21 +92,16 @@ app.component("itmManagement", {
         <h2>Manage Candidates</h2>
 
         <h3>Add New Candidate</h3>
-        <form name="candidatesubmit" ng-submit="$ctrl.submitCandidate($ctrl.newCandidate)" validate>
-
+        <form ng-submit="$ctrl.submitCandidate($ctrl.newCandidate)" validate>
             <label>Candidate Name</label>
-            <input type="text" name="candidatename" ng-model="$ctrl.newCandidate.name" required>
-            <div role="alert">
-            <!-- <span class="error" ng-show="candidatesubmit.candidatename.$error.required">Name is Required</span> -->
-    </div>
-
+            <input type="text" ng-model="$ctrl.newCandidate.name" required>    
             <button type="submit">Add</button>
         </form>
 
         <h3>Remove Candidate</h3>
         <ul>
             <li ng-repeat="candidate in $ctrl.candidates">
-                <span ng-bind="::candidate.name"></span>
+                <span ng-bind="candidate.name"></span>
                 <button type="button" ng-click="$ctrl.removeCandidate(candidate)">X</button>
             </li>
         </ul>
@@ -141,17 +128,33 @@ app.component("itmVote", {
 
 app.component("itmResults", {
     bindings: {
-        candidates: "<"
+        candidates: "<",
+        totalVotes: "<"
     },
-    controller: class {},
+    controller: class {
+
+        calculatePercentage(vote) {
+            return `${Math.round((vote/ this.totalVotes) * 100)}%`;
+        }
+    },
     template: `
         <h2>Live Results</h2>
-        <ul>
-            <li ng-repeat="candidate in $ctrl.candidates">
-                <span ng-bind="candidate.name"></span>
-                <strong ng-bind="candidate.votes"></strong>
-                <strong >{{candidate.percentage}}&percnt;</strong>
-            </li>
-        </ul>
+        <div class="result" ng-repeat="candidate in $ctrl.candidates | orderBy : '-votes'">
+            <div class="row">
+                <div class="col-sm-4">
+                    <h4 ng-bind="candidate.name"></h4>
+                </div>
+                <div class="col-sm-4 text-right">
+                    <h4>{{$ctrl.calculatePercentage(candidate.votes)}}</h4>
+                </div>
+                <div class="col-sm-4 text-center">
+                    <h4> {{candidate.votes}} votes</h4>
+                </div>                
+            </div>
+
+            <div class="progress">
+                <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuenow="92" aria-valuemin="0" aria-valuemax="100" ng-style="{ width: $ctrl.calculatePercentage(candidate.votes) }">
+            </div>
+        </div>
     `
 }); 

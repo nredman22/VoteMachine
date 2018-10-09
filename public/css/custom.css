@@ -1,0 +1,12 @@
+main {
+    background-color: #e2efff;
+    color: #666666;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.result {
+    width: 60%;
+    margin: auto;
+}
