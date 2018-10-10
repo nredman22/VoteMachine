@@ -75,7 +75,6 @@ app.component("itmManagement", {
         }
 
         submitCandidate(candidate) {
-            //if (candidate.name == null || candidate.name.length <= 0) return;
             this.onAdd({ $candidate: candidate });
             this.newCandidate = {
                 name: "",
@@ -90,7 +89,7 @@ app.component("itmManagement", {
     },
     template: `
         <h2>Manage Candidates</h2>
-        <div class="row" #>
+        <div class="row">
             <div class="col-md-6 text-center">
                 <h4>Add New Candidate</h4>
                 <div id="form-container">
@@ -104,7 +103,7 @@ app.component("itmManagement", {
 
        
             <div class="col-md-6 text-center"> 
-                    <h4>Remove Candidate</h4>
+                <h4>Remove Candidate</h4>
 
                 <div class="choose-options">
                     <div class="row choose-row">
