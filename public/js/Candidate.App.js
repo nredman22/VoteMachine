@@ -43,14 +43,14 @@ app.component("itmRoot", {
             </itm-results>
         </div>
 
-        <div class="container">
+        <div class="container" >
             <itm-vote 
                 candidates="$ctrl.candidates"
                 on-vote="$ctrl.onVote($candidate)">
             </itm-vote>
         </div>
 
-        <div class="container live-results">
+        <div class="container">
             <itm-management 
                 candidates="$ctrl.candidates"
                 on-add="$ctrl.onAddCandidate($candidate)"
@@ -90,22 +90,34 @@ app.component("itmManagement", {
     },
     template: `
         <h2>Manage Candidates</h2>
+        <div class="row" #>
+            <div class="col-md-6 text-center">
+                <h4>Add New Candidate</h4>
+                <div id="form-container">
+                    <form class="form-inline" ng-submit="$ctrl.submitCandidate($ctrl.newCandidate)" validate>
+                        <label class="sr-only" for="inlineFormInput">Name</label>
+                        <input type="text" class="form-control mb-4 mr-sm-2 mb-sm-0" ng-model="$ctrl.newCandidate.name" placeholder="Candidate Name" required>    
+                        <button type="submit" class="btn btn-primary">Add</button>
+                    </form>
+                </div>
+            </div>    
 
-        <h3>Add New Candidate</h3>
-        <form ng-submit="$ctrl.submitCandidate($ctrl.newCandidate)" validate>
-            <label>Candidate Name</label>
-            <input type="text" ng-model="$ctrl.newCandidate.name" required>    
-            <button type="submit">Add</button>
-        </form>
+       
+            <div class="col-md-6 text-center"> 
+                    <h4>Remove Candidate</h4>
 
-        <h3>Remove Candidate</h3>
-        <ul>
-            <li ng-repeat="candidate in $ctrl.candidates">
-                <span ng-bind="candidate.name"></span>
-                <button type="button" ng-click="$ctrl.removeCandidate(candidate)">X</button>
-            </li>
-        </ul>
-
+                <div class="choose-options">
+                    <div class="row choose-row">
+                        <div class="col-md-6" ng-repeat="candidate in $ctrl.candidates">
+                            <button type="button" class="btn btn-danger text-center selector" 
+                                ng-click="$ctrl.removeCandidate(candidate)">
+                                <span ng-bind="candidate.name"></span>  
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     `
 });
 
@@ -118,11 +130,16 @@ app.component("itmVote", {
     template: `
         <h2>Cast your vote!</h2>
 
-        <button type="button"
-            ng-repeat="candidate in $ctrl.candidates"
-            ng-click="$ctrl.onVote({ $candidate: candidate })">
-            <span ng-bind="candidate.name"></span>
-        </button>
+        <div class="choose-options">
+            <div class="row choose-row">
+                <div class="col-md-4" ng-repeat="candidate in $ctrl.candidates">
+                    <button type="button" class="btn btn-success text-center selector" 
+                        ng-click="$ctrl.onVote({ $candidate: candidate })">
+                        <span ng-bind="candidate.name"></span>  
+                    </button>
+                </div>
+            </div>
+        </div>
     `
 });
 
@@ -139,21 +156,24 @@ app.component("itmResults", {
     },
     template: `
         <h2>Live Results</h2>
-        <div class="result" ng-repeat="candidate in $ctrl.candidates | orderBy : '-votes'">
-            <div class="row">
-                <div class="col-sm-4">
-                    <h4 ng-bind="candidate.name"></h4>
-                </div>
-                <div class="col-sm-4 text-right">
-                    <h4>{{$ctrl.calculatePercentage(candidate.votes)}}</h4>
-                </div>
-                <div class="col-sm-4 text-center">
-                    <h4> {{candidate.votes}} votes</h4>
-                </div>                
-            </div>
 
-            <div class="progress">
-                <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuenow="92" aria-valuemin="0" aria-valuemax="100" ng-style="{ width: $ctrl.calculatePercentage(candidate.votes) }">
+        <div class="results">
+            <div class="result" ng-repeat="candidate in $ctrl.candidates | orderBy : '-votes'">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <h4 ng-bind="candidate.name"></h4>
+                    </div>
+                    <div class="col-sm-4 text-center">
+                        <h4>{{$ctrl.calculatePercentage(candidate.votes)}}</h4>
+                    </div>
+                    <div class="col-sm-4 text-right">
+                        <h4> {{candidate.votes}} votes</h4>
+                    </div>                
+                </div>
+
+                <div class="progress">
+                    <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuenow="92" aria-valuemin="0" aria-valuemax="100" ng-style="{ width: $ctrl.calculatePercentage(candidate.votes) }">
+                </div>
             </div>
         </div>
     `
