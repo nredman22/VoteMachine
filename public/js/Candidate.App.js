@@ -150,6 +150,9 @@ app.component("itmResults", {
     controller: class {
 
         calculatePercentage(vote) {
+            if (!this.totalVotes){
+                return `0%`;
+            }
             return `${Math.round((vote/ this.totalVotes) * 100)}%`;
         }
     },
